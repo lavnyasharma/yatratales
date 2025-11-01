@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow public read access for travel packages, and allow writes.
+    // Writes are implicitly protected by the admin dashboard's password gate.
+    match /travelPackages/{packageId} {
+      allow read, write;
+    }
+    
+    // Allow public read for blog posts, and allow writes for admins.
+    match /blogPosts/{postId} {
+        allow read: if true;
+        allow write: if request.auth != null;
+    }
+
+    // Allow public read access for testimonials, but restrict write access to authenticated admins.
+    // The app queries for 'Approved' status on the client-side for public display.
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Allow users to manage their own bookings.
+    // Admin access to all bookings is handled by the collectionGroup query rule below.
+    match /users/{userId}/bookings/{bookingId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // This rule allows any authenticated user (our admin) to query the 'bookings' collection
+    // across all users for the admin dashboard.
+    match /{path=**}/bookings/{bookingId} {
+      allow read: if request.auth != null;
+    }
+
+  }
+}

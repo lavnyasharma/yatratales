@@ -1,0 +1,322 @@
+{
+  "entities": {
+    "TravelPackage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TravelPackage",
+      "type": "object",
+      "description": "Represents a travel package offered on the website.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the travel package."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the travel package."
+        },
+        "location": {
+          "type": "string",
+          "description": "Location of the travel package (e.g., city, region, or country)."
+        },
+        "imageIds": {
+          "type": "array",
+          "description": "Array of placeholder image IDs.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pricing": {
+          "type": "array",
+          "description": "Array of pricing tiers based on hotel star rating.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "stars": { "type": "number", "description": "Hotel star rating (e.g., 3, 4, 5)." },
+              "rates": {
+                "type": "array",
+                "description": "Array of rates based on the number of people (pax).",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "pax": { "type": "number", "description": "Number of people." },
+                    "price": { "type": "number", "description": "Price per person for this pax count." }
+                  },
+                  "required": ["pax", "price"]
+                }
+              }
+            },
+            "required": ["stars", "rates"]
+          }
+        },
+        "duration": {
+          "type": "string",
+          "description": "Duration of the travel package (e.g., '4 Nights • 5 Days')."
+        },
+        "itinerary": {
+          "type": "string",
+          "description": "Detailed day-by-day itinerary of the travel package."
+        },
+        "itinerarySummary": {
+          "type": "array",
+          "description": "Summary of nights per location.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "nights": { "type": "number" },
+              "location": { "type": "string" }
+            },
+            "required": ["nights", "location"]
+          }
+        },
+        "hotelOptions": {
+           "type": "array",
+            "description": "Hotel options categorized by star rating.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "stars": { "type": "number" },
+                    "hotels": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                    }
+                },
+                "required": ["stars", "hotels"]
+            }
+        },
+        "inclusions": {
+          "type": "array",
+          "description": "Details what is included in the travel package.",
+          "items": { "type": "string" }
+        },
+        "exclusions": {
+          "type": "array",
+          "description": "Details what is excluded in the travel package.",
+           "items": { "type": "string" }
+        },
+        "transfers": {
+          "type": "array",
+          "description": "Details on transfers included in the package.",
+           "items": { "type": "string" }
+        },
+        "validity": {
+          "type": "string",
+          "description": "The validity period of the offer, e.g., '01 October 2025 - 31 March 2026'."
+        },
+        "terms": {
+          "type": "string",
+          "description": "Terms and conditions for the travel package."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "location",
+        "imageIds",
+        "pricing",
+        "duration",
+        "itinerary",
+        "hotelOptions",
+        "inclusions",
+        "exclusions",
+        "terms"
+      ]
+    },
+    "Booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Booking",
+      "type": "object",
+      "description": "Represents a booking made by a user for a travel package.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the booking."
+        },
+        "travelPackageId": {
+          "type": "string",
+          "description": "Reference to the TravelPackage entity. (Relationship: TravelPackage 1:N Booking)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person who made the booking."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the person who made the booking.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the person who made the booking."
+        },
+        "travellers": {
+          "type": "number",
+          "description": "Number of travellers for the booking."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the booking.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "travelPackageId",
+        "name",
+        "email",
+        "phone",
+        "travellers",
+        "date"
+      ]
+    },
+    "Testimonial": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Testimonial",
+      "type": "object",
+      "description": "Represents a user testimonial or review.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the testimonial."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person who gave the testimonial."
+        },
+        "image": {
+          "type": "string",
+          "description": "URL of the image of the person who gave the testimonial, stored in Firebase Storage."
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating given in the testimonial (e.g., 1 to 5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Text of the testimonial comment."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "image",
+        "rating",
+        "comment"
+      ]
+    },
+    "BlogPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "BlogPost",
+      "type": "object",
+      "description": "Represents a blog post on the travel website.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the blog post."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the blog post."
+        },
+        "featuredImage": {
+          "type": "string",
+          "description": "URL of the featured image for the blog post, stored in Firebase Storage."
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the blog post (HTML or Markdown)."
+        },
+        "publishDate": {
+          "type": "string",
+          "description": "Date when the blog post was published.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "featuredImage",
+        "content",
+        "publishDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/travelPackages/{travelPackageId}",
+        "definition": {
+          "entityName": "TravelPackage",
+          "schema": {
+            "$ref": "#/backend/entities/TravelPackage"
+          },
+          "description": "Stores travel packages offered on the website.  Publicly accessible.",
+          "params": [
+            {
+              "name": "travelPackageId",
+              "description": "Unique identifier for the travel package."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/bookings/{bookingId}",
+        "definition": {
+          "entityName": "Booking",
+          "schema": {
+            "$ref": "#/backend/entities/Booking"
+          },
+          "description": "Stores bookings made by users.  Accessible only to the user who created the booking.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "bookingId",
+              "description": "Unique identifier for the booking."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/testimonials/{testimonialId}",
+        "definition": {
+          "entityName": "Testimonial",
+          "schema": {
+            "$ref": "#/backend/entities/Testimonial"
+          },
+          "description": "Stores user testimonials.  Publicly accessible.",
+          "params": [
+            {
+              "name": "testimonialId",
+              "description": "Unique identifier for the testimonial."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/blogPosts/{blogPostId}",
+        "definition": {
+          "entityName": "BlogPost",
+          "schema": {
+            "$ref": "#/backend/entities/BlogPost"
+          },
+          "description": "Stores blog posts. Publicly accessible.",
+          "params": [
+            {
+              "name": "blogPostId",
+              "description": "Unique identifier for the blog post."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure prioritizes security, scalability, and ease of debugging based on the core design principles and strategy mandates. It emphasizes authorization independence, clarity of intent, and structural segregation to ensure robust security rules and efficient data management.\n\n**Authorization Independence:** The structure avoids hierarchical authorization dependencies (`get()` calls) by denormalizing authorization context (Strategy A). Specifically, the `members` map in collaborative data scenarios (if applicable) would be copied into subcollections to ensure access control can be determined without fetching parent document data. For user-owned data, explicit path-based ownership is used.\n\n**Clarity of Intent:** The structure clearly defines access patterns through path-based ownership for private data and membership maps for collaborative data. Explicit state modeling using a dedicated `status` field (if needed in future) further enhances readability and debuggability.\n\n**Structural Segregation:** Data with different access requirements are stored in separate collections (Strategy B). For example, travel packages are stored in the `/travelPackages` collection, while bookings are stored under `/users/{userId}/bookings/{bookingId}`, and testimonials and blog posts are stored in separate collections as well. This simplifies security rules by ensuring all documents within a collection share the same security posture.\n\n**QAPs (Rules are not Filters):** The structure enables secure `list` operations by enforcing consistent security rules at the collection level. Path-based ownership and membership maps (if applicable) guarantee that listing documents within a collection only returns data that the user is authorized to access. The segregation of data into collections with homogeneous security requirements ensures that rules do not need to act as filters.\n\n**Invariants:** The path based ownership maintains the ownership invariant. Timestamps (if included in entities) can be secured using rules.\n\n**Denormalization Strategy:** To achieve Authorization Independence, if collaborative features (e.g., shared itineraries) are added in the future, the `members` map (containing user IDs and their roles) from the parent document (e.g., shared itinerary) should be denormalized into the child documents (e.g., itinerary items). This eliminates the need for `get()` calls in security rules to check user permissions on parent documents.\n\n**Example Scenario:**\nIf a user is creating a `Booking` document under `/users/{userId}/bookings/{bookingId}`, the security rules can directly verify that `request.auth.uid == userId` without needing to fetch any parent document or perform complex logic. Similarly, testimonials, blog posts, and travel packages are stored in separate collections where different access rules apply."
+  }
+}

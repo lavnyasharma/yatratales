@@ -1,0 +1,106 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-illustration",
+      "description": "Travel and tourism collage illustration.",
+      "imageUrl": "https://demo2.pavothemes.com/triply/wp-content/uploads/2022/09/h6_banner.png",
+      "imageHint": "travel illustration"
+    },
+    {
+      "id": "package-alps",
+      "description": "A stunning view of the Swiss Alps.",
+      "imageUrl": "https://images.unsplash.com/photo-1617256955938-598efba0ea5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzd2lzcyUyMGFscHN8ZW58MHx8fHwxNzYxOTg0NTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "swiss alps"
+    },
+    {
+      "id": "package-kyoto",
+      "description": "Traditional temples in Kyoto, Japan.",
+      "imageUrl": "https://images.unsplash.com/photo-1635494441315-fbc3a131d9e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxreW90byUyMHRlbXBsZXxlbnwwfHx8fDE3NjE5NDU1OTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kyoto temple"
+    },
+    {
+      "id": "package-santorini",
+      "description": "White buildings with blue domes in Santorini, Greece.",
+      "imageUrl": "https://images.unsplash.com/photo-1560703650-ef3e0f254ae0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzYW50b3JpbmklMjBncmVlY2V8ZW58MHx8fHwxNzYxOTcxMzg3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "santorini greece"
+    },
+    {
+      "id": "package-peru",
+      "description": "The ancient ruins of Machu Picchu in Peru.",
+      "imageUrl": "https://images.unsplash.com/photo-1543385426-191664295b58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYWNodSUyMHBpY2NodXxlbnwwfHx8fDE3NjIwMTM1OTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "machu picchu"
+    },
+    {
+      "id": "package-kerala-1",
+      "description": "A houseboat on the backwaters of Kerala.",
+      "imageUrl": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNzEzfDB8MXxzZWFyY2h8M3x8a2VyYWxhJTIwYmFja3dhdGVyc3xlbnwwfHx8fDE2NjUwNDM2NjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kerala backwaters"
+    },
+    {
+      "id": "package-kerala-2",
+      "description": "A boat sailing on a lake surrounded by green hills in Kerala.",
+      "imageUrl": "https://images.unsplash.com/photo-1614923348123-74a75d50f3ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNzEzfDB8MXxzZWFyY2h8MTF8fGtlcmFsYSUyMGJvYXR8ZW58MHx8fHwxNjY1MDQzNjg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kerala boat"
+    },
+    {
+      "id": "package-kerala-bg",
+      "description": "Lush green tea plantations in Munnar, Kerala.",
+      "imageUrl": "https://images.unsplash.com/photo-1613665813446-82a78c468a1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNzEzfDB8MXxzZWFyY2h8Mnx8bXVubmFyfGVufDB8fHx8MTY2NTA0MzYyNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "munnar tea"
+    },
+    {
+      "id": "destination-paris",
+      "description": "The Eiffel Tower in Paris, France.",
+      "imageUrl": "https://images.unsplash.com/photo-1439393161192-32360eb753f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxlaWZmZWwlMjB0b3dlcnxlbnwwfHx8fDE3NjIwMDgxODZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "eiffel tower"
+    },
+    {
+      "id": "destination-rome",
+      "description": "The Colosseum in Rome, Italy.",
+      "imageUrl": "https://images.unsplash.com/photo-1668171321834-658179e37f5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjb2xvc3NldW0lMjByb21lfGVufDB8fHx8MTc2MTk0NTc4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "colosseum rome"
+    },
+    {
+      "id": "destination-ny",
+      "description": "The skyline of New York City.",
+      "imageUrl": "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxuZXclMjB5b3JrfGVufDB8fHx8MTc2MTkwMjk4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "new york"
+    },
+    {
+      "id": "testimonial-1",
+      "description": "A happy traveler.",
+      "imageUrl": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjE5ODk0NTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "testimonial-2",
+      "description": "Another happy traveler.",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzYxOTgwMjIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "blog-1",
+      "description": "A sandy beach for a blog post about tropical destinations.",
+      "imageUrl": "https://images.unsplash.com/photo-1543988884-c01cfa7b41c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzYW5keSUyMGJlYWNofGVufDB8fHx8MTc2MjAxMzU5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sandy beach"
+    },
+    {
+      "id": "blog-2",
+      "description": "A bustling city street for a blog post about urban exploration.",
+      "imageUrl": "https://images.unsplash.com/photo-1617121346253-43ef95179ac9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaXR5JTIwc3RyZWV0fGVufDB8fHx8MTc2MTk2Njk2OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city street"
+    },
+    {
+      "id": "blog-3",
+      "description": "A forest trail for a blog post about hiking.",
+      "imageUrl": "https://images.unsplash.com/photo-1644157394446-4e0b95836055?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb3Jlc3QlMjB0cmFpbHxlbnwwfHx8fDE3NjE5MzIwMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "forest trail"
+    },
+    {
+      "id": "avatar-placeholder",
+      "description": "A generic avatar placeholder.",
+      "imageUrl": "https://images.unsplash.com/photo-1644310972589-643a2099d946?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxhYnN0cmFjdCUyMHNoYXBlfGVufDB8fHx8MTc2MTkzMTM5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract shape"
+    }
+  ]
+}
