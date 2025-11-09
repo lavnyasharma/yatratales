@@ -7,12 +7,11 @@ import { Button } from '@/components/ui/button';
 import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Search, X, MapPin } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { TravelPackage } from '@/lib/types';
 
-
-export default function AllPackagesPage() {
+function PackagesContent() {
   const { firestore } = useFirebase();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -168,6 +167,20 @@ export default function AllPackagesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AllPackagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="container py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Array.from({ length: 6 }).map((_, i) => <PackageCardSkeleton key={i} />)}
+        </div>
+      </div>
+    }>
+      <PackagesContent />
+    </Suspense>
   );
 }
 

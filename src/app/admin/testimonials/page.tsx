@@ -18,25 +18,86 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import DashboardCard from '@/components/admin/DashboardCard';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 
 const getPlaceholder = (id: string) => PlaceHolderImages.find(p => p.id === id);
 
-// Mock Data
-const mockReviews = [
-  { id: '1', name: 'Alice Johnson', imageId: 'testimonial-1', rating: 5, comment: 'An unforgettable experience! The entire trip was seamless and well-organized. Wanderlust Explorer is the best.', status: 'Approved', package: 'Spectacular Swiss Alps' },
-  { id: '2', name: 'David Smith', imageId: 'testimonial-2', rating: 5, comment: 'I had the time of my life. The destinations were stunning and the guides were fantastic. Highly recommended!', status: 'Approved', package: 'Spectacular Swiss Alps' },
-  { id: '3', name: 'Jane Doe', imageId: 'avatar-placeholder', rating: 4, comment: 'Great trip overall, but one of the hotel check-ins was a bit slow. Otherwise, fantastic.', status: 'Pending', package: 'Sunsets in Santorini' },
-];
-
-const totalTestimonialsCount = mockReviews.length;
-const pendingTestimonialsCount = mockReviews.filter(r => r.status === 'Pending').length;
-const approvedTestimonialsCount = mockReviews.filter(r => r.status === 'Approved').length;
-const avgRating = mockReviews.length > 0 
-  ? (mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length).toFixed(1)
-  : '0.0';
 
 export default function TestimonialsAdminPage() {
+  const { firestore } = useFirebase();
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
+
+  const testimonialsQuery = useMemoFirebase(
+    () =>
+      firestore
+        ? query(
+            collection(firestore, 'testimonials'),
+            orderBy('createdAt', 'desc')
+          )
+        : null,
+    [firestore]
+  );
+
+  const { data: testimonials, isLoading } = useCollection(testimonialsQuery);
+
+  const handleApprove = async (testimonialId: string) => {
+    if (!firestore) return;
+    
+    setIsUpdating(testimonialId);
+    try {
+      await updateDoc(doc(firestore, 'testimonials', testimonialId), {
+        status: 'Approved'
+      });
+      toast({
+        title: 'Success',
+        description: 'Testimonial approved successfully',
+      });
+    } catch (error) {
+      console.error('Error approving testimonial:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to approve testimonial',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  const handleDelete = async (testimonialId: string) => {
+    if (!firestore) return;
+    
+    setIsUpdating(testimonialId);
+    try {
+      await deleteDoc(doc(firestore, 'testimonials', testimonialId));
+      toast({
+        title: 'Success',
+        description: 'Testimonial deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete testimonial',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  const totalTestimonialsCount = testimonials?.length || 0;
+  const pendingTestimonialsCount = testimonials?.filter(r => r.status === 'Pending').length || 0;
+  const approvedTestimonialsCount = testimonials?.filter(r => r.status === 'Approved').length || 0;
+  const avgRating = testimonials && testimonials.length > 0 
+    ? (testimonials.reduce((sum, review) => sum + review.rating, 0) / testimonials.length).toFixed(1)
+    : '0.0';
+
   return (
     <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
       {/* Header Section */}
@@ -112,7 +173,7 @@ export default function TestimonialsAdminPage() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="font-medium">
-              {mockReviews.length} Total
+              {totalTestimonialsCount} Total
             </Badge>
             <Button variant="outline" size="sm" className="gap-2">
               <Eye className="h-4 w-4" />
@@ -134,8 +195,27 @@ export default function TestimonialsAdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockReviews.map((review) => {
-                  const image = getPlaceholder(review.imageId);
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-12 w-12 rounded-full" />
+                          <div>
+                            <Skeleton className="h-4 w-24 mb-2" />
+                            <Skeleton className="h-3 w-16" />
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : testimonials?.map((review) => {
+                  const image = getPlaceholder('testimonial-1');
                   return (
                     <TableRow 
                       key={review.id} 
@@ -151,7 +231,7 @@ export default function TestimonialsAdminPage() {
                           </Avatar>
                           <div>
                             <div className="font-semibold text-foreground">{review.name}</div>
-                            <div className="text-sm text-muted-foreground">Customer</div>
+                            <div className="text-sm text-muted-foreground">{review.email}</div>
                           </div>
                         </div>
                       </TableCell>
@@ -159,7 +239,7 @@ export default function TestimonialsAdminPage() {
                         <p className="line-clamp-2 text-foreground/80 leading-relaxed">{review.comment}</p>
                       </TableCell>
                       <TableCell className="py-4">
-                        <div className="font-medium text-foreground">{review.package}</div>
+                        <div className="font-medium text-foreground">{review.packageName}</div>
                       </TableCell>
                       <TableCell className="text-center py-4">
                         <div className="flex items-center justify-center gap-2">
@@ -192,7 +272,12 @@ export default function TestimonialsAdminPage() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-primary/10">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 hover:bg-primary/10"
+                              disabled={isUpdating === review.id}
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                               <span className="sr-only">Toggle menu</span>
                             </Button>
@@ -200,11 +285,19 @@ export default function TestimonialsAdminPage() {
                           <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             {review.status === 'Pending' && (
-                              <DropdownMenuItem className="gap-2">
+                              <DropdownMenuItem 
+                                className="gap-2"
+                                onClick={() => handleApprove(review.id)}
+                                disabled={isUpdating === review.id}
+                              >
                                 <Check className="h-4 w-4 text-green-500"/> Approve Testimonial
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem className="text-destructive gap-2">
+                            <DropdownMenuItem 
+                              className="text-destructive gap-2"
+                              onClick={() => handleDelete(review.id)}
+                              disabled={isUpdating === review.id}
+                            >
                               <Trash className="h-4 w-4"/> Delete Testimonial
                             </DropdownMenuItem>
                           </DropdownMenuContent>

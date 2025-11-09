@@ -43,14 +43,206 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useFirebase, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where } from 'firebase/firestore';
+import { doc, collection, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
 import type { TravelPackage, HotelOption, PricingTier, Testimonial } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import BookingDialog from './BookingDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { use, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { toast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 const getPlaceholder = (id: string) => PlaceHolderImages.find((p) => p.id === id);
+
+const reviewSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  website: z.string().optional(),
+  comment: z.string().min(10, 'Comment must be at least 10 characters'),
+  rating: z.number().min(1).max(5),
+});
+
+type ReviewFormData = z.infer<typeof reviewSchema>;
+
+function ReviewForm({ packageId, packageName }: { packageId: string; packageName: string }) {
+  const { firestore, user } = useFirebase();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+  
+  const form = useForm<ReviewFormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      name: user?.displayName || '',
+      email: user?.email || '',
+      website: '',
+      comment: '',
+      rating: 0,
+    },
+  });
+
+  const onSubmit = async (data: ReviewFormData) => {
+    if (!firestore) {
+      toast({
+        title: 'Error',
+        description: 'Database connection not available',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (selectedRating === 0) {
+      toast({
+        title: 'Rating Required',
+        description: 'Please select a rating before submitting',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      await addDoc(collection(firestore, 'testimonials'), {
+        ...data,
+        rating: selectedRating,
+        packageId,
+        packageName,
+        status: 'Pending',
+        createdAt: serverTimestamp(),
+        userId: user?.uid || null,
+      });
+      
+      toast({
+        title: 'Review Submitted!',
+        description: 'Thank you for your feedback. Your review is pending approval.',
+      });
+      
+      form.reset();
+      setSelectedRating(0);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast({
+        title: 'Submission Failed',
+        description: 'There was an error submitting your review. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="py-8">
+      <h2 className="text-2xl font-bold mb-6">Leave a Review</h2>
+      <p className="text-sm text-muted-foreground mb-6">
+        Your email address will not be published. Required fields are marked *
+      </p>
+      
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Your Name *</Label>
+            <Input
+              id="name"
+              {...form.register('name')}
+              className="p-3 border rounded-lg text-sm"
+            />
+            {form.formState.errors.name && (
+              <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address *</Label>
+            <Input
+              id="email"
+              type="email"
+              {...form.register('email')}
+              className="p-3 border rounded-lg text-sm"
+            />
+            {form.formState.errors.email && (
+              <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="website">Your Website</Label>
+            <Input
+              id="website"
+              type="url"
+              {...form.register('website')}
+              className="p-3 border rounded-lg text-sm"
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <Label htmlFor="comment">Comment *</Label>
+            <Textarea
+              id="comment"
+              {...form.register('comment')}
+              placeholder="Share your experience with this package..."
+              rows={6}
+              className="p-3 border rounded-lg text-sm resize-none"
+            />
+            {form.formState.errors.comment && (
+              <p className="text-sm text-destructive">{form.formState.errors.comment.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <Label>Overall Rating *</Label>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm font-medium">Rate this package:</span>
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setSelectedRating(i + 1)}
+                      className="transition-colors"
+                    >
+                      <Star 
+                        className={`h-6 w-6 ${
+                          i < selectedRating 
+                            ? 'text-yellow-500 fill-current' 
+                            : 'text-muted-foreground hover:text-yellow-400'
+                        }`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+                <span className="text-sm text-muted-foreground">({selectedRating}/5)</span>
+              </div>
+            </div>
+            
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3">Package: {packageName}</h4>
+              <p className="text-sm text-muted-foreground">
+                Your review will help other travelers make informed decisions about this package.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="bg-primary hover:bg-primary/90 text-white px-8"
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Review'}
+        </Button>
+      </form>
+    </section>
+  );
+}
 
 function TourPlanSection({ itinerary }: { itinerary?: string }) {
     const [expandedDay, setExpandedDay] = useState<number | null>(null);
@@ -562,62 +754,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
                         <TestimonialsSection packageId={id} />
                         
                         {/* Leave a Reply Section */}
-                        <section className="py-8">
-                            <h2 className="text-2xl font-bold mb-6">Leave a Reply</h2>
-                            <p className="text-sm text-muted-foreground mb-6">
-                                Your email address will not be published. Required fields are marked *
-                            </p>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                <input 
-                                    type="text" 
-                                    placeholder="Your Name *" 
-                                    className="p-3 border rounded-lg text-sm"
-                                />
-                                <input 
-                                    type="email" 
-                                    placeholder="Email Address *" 
-                                    className="p-3 border rounded-lg text-sm"
-                                />
-                                <input 
-                                    type="url" 
-                                    placeholder="Your Website" 
-                                    className="p-3 border rounded-lg text-sm"
-                                />
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <textarea 
-                                    placeholder="Comment" 
-                                    rows={6}
-                                    className="p-3 border rounded-lg text-sm resize-none"
-                                />
-                                
-                                <div className="space-y-4">
-                                    {['Location', 'Amenities', 'Services', 'Price', 'Rooms'].map((category) => (
-                                        <div key={category} className="flex items-center justify-between">
-                                            <span className="text-sm font-medium">{category}</span>
-                                            <div className="flex gap-1">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star key={i} className="h-4 w-4 text-muted-foreground hover:text-yellow-500 cursor-pointer" />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-2 mt-6 mb-4">
-                                <input type="checkbox" id="save-info" className="rounded" />
-                                <label htmlFor="save-info" className="text-sm text-muted-foreground">
-                                    Save my name, email, and website in this browser for the next time I comment.
-                                </label>
-                            </div>
-                            
-                            <Button className="bg-primary hover:bg-primary/90 text-white px-8">
-                                Post Comment
-                            </Button>
-                        </section>
+                        <ReviewForm packageId={id} packageName={packageData.title} />
                     </div>
 
                     {/* Sidebar */}

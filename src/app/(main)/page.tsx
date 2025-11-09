@@ -268,6 +268,7 @@ function FeaturedPackagesSection() {
 
 function TestimonialsSection() {
   const { firestore } = useFirebase();
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const testimonialsQuery = useMemoFirebase(
     () =>
@@ -275,55 +276,158 @@ function TestimonialsSection() {
         ? query(
             collection(firestore, 'testimonials'),
             where('status', '==', 'Approved'),
-            limit(2)
+            limit(5)
           )
         : null,
     [firestore]
   );
   const { data: testimonials, isLoading } = useCollection(testimonialsQuery);
 
-  return (
-    <section className="py-16 lg:py-24">
-      <div className="container">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold">What Our Customers Say</h2>
-          <p className="text-muted-foreground mt-2">Real stories from our happy travelers.</p>
+  const nextTestimonial = () => {
+    if (testimonials && testimonials.length > 0) {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }
+  };
+
+  const prevTestimonial = () => {
+    if (testimonials && testimonials.length > 0) {
+      setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="relative py-16 lg:py-24 bg-muted/30">
+        <div className="container">
+          <div className="text-center text-white mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Simply the best and most relevant way to travel</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="text-center">
+                  <Skeleton className="h-12 w-24 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-16 mx-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {isLoading ? (
-             Array.from({ length: 2 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden bg-secondary border-none shadow-lg">
-                <CardContent className="p-8 text-center flex flex-col items-center">
-                    <Skeleton className="h-20 w-20 rounded-full mb-4" />
-                    <Skeleton className="h-6 w-24 mb-2" />
-                    <Skeleton className="h-5 w-32 mb-4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            testimonials?.map((testimonial) => {
-              const img = getPlaceholder('testimonial-1'); // Using a generic one for now
-              return (
-                <Card key={testimonial.id} className="overflow-hidden bg-secondary border-none shadow-lg">
-                  <CardContent className="p-8 text-center">
-                      <Avatar className="h-20 w-20 ring-4 ring-background mx-auto mb-4">
-                        <AvatarImage src={testimonial.image || img?.imageUrl} alt={testimonial.name} data-ai-hint={img?.imageHint} />
-                        <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <p className="font-semibold text-foreground text-lg">{testimonial.name}</p>
-                      <div className="flex justify-center items-center my-2">
-                          {[...Array(testimonial.rating)].map((_, i) => (
-                            <Star key={i} className="h-5 w-5 text-yellow-500 fill-current" />
-                          ))}
-                      </div>
-                      <blockquote className="text-foreground/80 italic text-md mt-4">"{testimonial.comment}"</blockquote>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
+      </section>
+    );
+  }
+
+  if (!testimonials || testimonials.length === 0) {
+    return null;
+  }
+
+  const currentTestimonialData = testimonials[currentTestimonial];
+
+  return (
+    <section className="relative py-16 lg:py-24 overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={getPlaceholder('hero-bg')?.imageUrl || '/api/placeholder/1200/600'}
+          alt="Background"
+          fill
+          className="object-cover"
+          data-ai-hint={getPlaceholder('hero-bg')?.imageHint}
+        />
+        <div className="absolute inset-0 bg-black/60"></div>
+      </div>
+      
+      <div className="container relative z-10">
+        <div className="text-center text-white mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Simply the best and most relevant way to travel</h2>
+          
+          {/* Statistics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">2154<span className="text-2xl">+</span></div>
+              <div className="text-sm text-white/80">Locations</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">109<span className="text-2xl">+</span></div>
+              <div className="text-sm text-white/80">Countries</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">720<span className="text-2xl">+</span></div>
+              <div className="text-sm text-white/80">Guides</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">25,214<span className="text-2xl">+</span></div>
+              <div className="text-sm text-white/80">Reviews</div>
+            </div>
+          </div>
+          
+          {/* Average Rating Badge */}
+          <div className="absolute top-8 right-8 bg-green-500 text-white rounded-full p-4 text-center hidden md:block">
+            <div className="text-xs mb-1">AVERAGE RATING</div>
+            <div className="text-2xl font-bold">4.8</div>
+            <div className="flex justify-center mt-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-3 h-3 text-white fill-current" />
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Testimonial Carousel */}
+        <div className="max-w-4xl mx-auto">
+          <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <CardContent className="p-8 md:p-12 text-center">
+              {/* Star Rating */}
+              <div className="flex justify-center mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-6 h-6 text-primary fill-current" />
+                ))}
+              </div>
+              
+              {/* Testimonial Text */}
+              <blockquote className="text-xl md:text-2xl text-foreground mb-8 leading-relaxed italic">
+                "{currentTestimonialData.comment}"
+              </blockquote>
+              
+              {/* Author */}
+              <div className="text-muted-foreground">
+                <p className="font-semibold">{currentTestimonialData.name}</p>
+                <p className="text-sm">{currentTestimonialData.location || 'New York, USA'}</p>
+              </div>
+              
+              {/* Navigation */}
+              <div className="flex justify-center items-center mt-8 gap-4">
+                <button
+                  onClick={prevTestimonial}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-muted-foreground/20 flex items-center justify-center transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                {/* Dots */}
+                <div className="flex gap-2">
+                  {testimonials.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentTestimonial(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === currentTestimonial ? 'bg-primary' : 'bg-muted-foreground/30'
+                      }`}
+                    />
+                  ))}
+                </div>
+                
+                <button
+                  onClick={nextTestimonial}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-muted-foreground/20 flex items-center justify-center transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </section>
