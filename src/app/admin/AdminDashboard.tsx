@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useFirebase } from '@/firebase';
+import { cn } from '@/lib/utils';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -62,44 +63,62 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 to-secondary/20 p-4">
-      <Card className="w-full max-w-md mx-4 shadow-2xl border-0 bg-background/80 backdrop-blur-sm">
-        <CardHeader className="text-center pt-8">
-          <div className="flex justify-center items-center mb-6">
-            <div className="bg-primary/10 p-4 rounded-2xl">
-              <Image 
-                src="https://wrijpsiiuvmeqaeklnqi.supabase.co/storage/v1/object/sign/new/210d78b0-4ac1-4ae3-b198-2a853604bffb_removalai_preview.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNTNkMmE3MS00ODk1LTRmN2YtYWExYS01ZjA1ZDhlYWE2YTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJuZXcvMjEwZDc4YjAtNGFjMS00YWUzLWIxOTgtMmE4NTM2MDRiZmZiX3JlbW92YWxhaV9wcmV2aWV3LnBuZyIsImlhdCI6MTc2MjAyMzI2MywiZXhwIjoxNzkzNTU5MjYzfQ.3wq320XBZwpLHozsDFBDapJdBZDYlLZmPL5bm06aC8w" 
-                alt="Yatra Tales Logo" 
-                width={100} 
-                height={35}
-                className="object-contain"
-              />
+    <div className="w-full bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm mx-auto">
+          <CardHeader className="text-center pt-8 pb-6">
+            <div className="flex justify-center items-center mb-8">
+              <div className="relative">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-3xl shadow-lg">
+                  <Image 
+                    src="https://wrijpsiiuvmeqaeklnqi.supabase.co/storage/v1/object/sign/new/210d78b0-4ac1-4ae3-b198-2a853604bffb_removalai_preview.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNTNkMmE3MS00ODk1LTRmN2YtYWExYS01ZjA1ZDhlYWE2YTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJuZXcvMjEwZDc4YjAtNGFjMS00YWUzLWIxOTgtMmE4NTM2MDRiZmZiX3JlbW92YWxhaV9wcmV2aWV3LnBuZyIsImlhdCI6MTc2MjAyMzI2MywiZXhwIjoxNzkzNTU5MjYzfQ.3wq320XBZwpLHozsDFBDapJdBZDYlLZmPL5bm06aC8w" 
+                    alt="Yatra Tales Logo" 
+                    width={120} 
+                    height={42}
+                    className="object-contain"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-primary/5 rounded-3xl animate-pulse opacity-50"></div>
+              </div>
             </div>
-          </div>
-          <CardTitle className="text-2xl font-headline text-foreground">Admin Dashboard</CardTitle>
-          <CardDescription>Enter your password to access the admin panel</CardDescription>
-        </CardHeader>
-        <CardContent className="pb-8">
-          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError('');
-                }}
-                placeholder="Enter your password"
-                className="h-12 text-base rounded-xl border-muted-foreground/20 focus:border-primary"
-              />
-              {error && <p className="text-sm text-destructive text-center">{error}</p>}
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Admin Dashboard
+              </CardTitle>
+              <CardDescription className="text-base text-muted-foreground">
+                Enter your password to access the admin panel
+              </CardDescription>
             </div>
-            <Button type="submit" className="w-full h-12 rounded-xl font-medium text-base">
-              Sign In
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="pb-8 px-8">
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-3">
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError('');
+                  }}
+                  placeholder="Enter your password"
+                  className="h-14 text-base rounded-xl border-2 border-muted-foreground/20 focus:border-primary/50 bg-white/50 backdrop-blur-sm transition-all duration-300"
+                />
+                {error && (
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                    <p className="text-sm text-destructive text-center font-medium">{error}</p>
+                  </div>
+                )}
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full h-14 rounded-xl font-semibold text-base bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -171,51 +190,78 @@ export default function AdminDashboard({
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-      <Sidebar className="border-r bg-sidebar text-sidebar-foreground">
-        <SidebarHeader className="border-b border-sidebar-border p-4">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="bg-sidebar-primary/10 p-2 rounded-xl">
-              <Image 
-                src="https://wrijpsiiuvmeqaeklnqi.supabase.co/storage/v1/object/sign/new/210d78b0-4ac1-4ae3-b198-2a853604bffb_removalai_preview.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNTNkMmE3MS00ODk1LTRmN2YtYWExYS01ZjA1ZDhlYWE2YTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJuZXcvMjEwZDc4YjAtNGFjMS00YWUzLWIxOTgtMmE4NTM2MDRiZmZiX3JlbW92YWxhaV9wcmV2aWV3LnBuZyIsImlhdCI6MTc2MjAyMzI2MywiZXhwIjoxNzkzNTU5MjYzfQ.3wq320XBZwpLHozsDFBDapJdBZDYlLZmPL5bm06aC8w" 
-                alt="Yatra Tales Logo" 
-                width={32} 
-                height={32}
-                className="object-contain"
-              />
+      <Sidebar className="border-r border-sidebar-border bg-gradient-to-b from-sidebar to-sidebar/95 text-sidebar-foreground shadow-lg">
+        <SidebarHeader className="border-b border-sidebar-border/50 p-6 bg-gradient-to-r from-sidebar-accent/30 to-transparent">
+          <Link href="/admin" className="flex items-center gap-4 group">
+            <div className="relative">
+              <div className="bg-gradient-to-br from-sidebar-primary/15 to-sidebar-primary/5 p-3 rounded-2xl shadow-sm group-hover:shadow-md transition-all duration-300">
+                <Image 
+                  src="https://wrijpsiiuvmeqaeklnqi.supabase.co/storage/v1/object/sign/new/210d78b0-4ac1-4ae3-b198-2a853604bffb_removalai_preview.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNTNkMmE3MS00ODk1LTRmN2YtYWExYS01ZjA1ZDhlYWE2YTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJuZXcvMjEwZDc4YjAtNGFjMS00YWUzLWIxOTgtMmE4NTM2MDRiZmZiX3JlbW92YWxhaV9wcmV2aWV3LnBuZyIsImlhdCI6MTc2MjAyMzI2MywiZXhwIjoxNzkzNTU5MjYzfQ.3wq320XBZwpLHozsDFBDapJdBZDYlLZmPL5bm06aC8w" 
+                  alt="Yatra Tales Logo" 
+                  width={36} 
+                  height={36}
+                  className="object-contain"
+                />
+              </div>
+              <div className="absolute inset-0 bg-sidebar-primary/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg tracking-tight text-sidebar-foreground">Yatra Tales</span>
-              <span className="text-xs text-sidebar-foreground/70">Admin Panel</span>
+              <span className="font-bold text-xl tracking-tight text-sidebar-foreground group-hover:text-sidebar-primary transition-colors duration-300">Yatra Tales</span>
+              <span className="text-sm text-sidebar-foreground/70 font-medium">Admin Panel</span>
             </div>
           </Link>
         </SidebarHeader>
-        <SidebarContent className="px-2 py-4 bg-sidebar">
-          <SidebarMenu>
-            {adminNavItems.map((item) => (
-              <SidebarMenuItem key={item.href} className="bg-sidebar">
-                <Link href={item.href}>
-                  <SidebarMenuButton 
-                    isActive={pathname.startsWith(item.href)} 
-                    className="rounded-xl h-12 mb-1 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  >
-                    <item.icon className="size-5" />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
+        <SidebarContent className="px-3 py-6 bg-gradient-to-b from-sidebar to-sidebar/95">
+          <SidebarMenu className="space-y-2">
+            {adminNavItems.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <SidebarMenuItem key={item.href}>
+                  <Link href={item.href}>
+                    <SidebarMenuButton 
+                      isActive={isActive}
+                      className={cn(
+                        "group relative rounded-2xl h-14 mb-2 text-sidebar-foreground transition-all duration-300 font-medium",
+                        isActive 
+                          ? "bg-gradient-to-r from-sidebar-primary/15 to-sidebar-primary/5 text-sidebar-primary shadow-md border border-sidebar-primary/20" 
+                          : "hover:bg-gradient-to-r hover:from-sidebar-accent/50 hover:to-sidebar-accent/20 hover:text-sidebar-accent-foreground hover:shadow-sm"
+                      )}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={cn(
+                          "p-2 rounded-xl transition-all duration-300",
+                          isActive 
+                            ? "bg-sidebar-primary/10 text-sidebar-primary" 
+                            : "bg-sidebar-foreground/5 group-hover:bg-sidebar-accent/30"
+                        )}>
+                          <item.icon className="size-5" />
+                        </div>
+                        <span className="text-base">{item.label}</span>
+                      </div>
+                      {isActive && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-sidebar-primary rounded-full animate-pulse"></div>
+                      )}
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar">
-          <SidebarMenu>
+        <SidebarFooter className="p-4 border-t border-sidebar-border/50 bg-gradient-to-r from-sidebar-accent/20 to-transparent">
+          <SidebarMenu className="space-y-2">
             <SidebarMenuItem>
               <Link href="/">
                 <SidebarMenuButton 
                   variant="ghost" 
-                  className="rounded-xl h-12 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  className="group rounded-2xl h-12 text-sidebar-foreground hover:bg-gradient-to-r hover:from-sidebar-accent/50 hover:to-sidebar-accent/20 hover:text-sidebar-accent-foreground transition-all duration-300 font-medium"
                 >
-                  <Home className="size-5" />
-                  <span>Homepage</span>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-sidebar-foreground/5 group-hover:bg-sidebar-accent/30 transition-all duration-300">
+                      <Home className="size-4" />
+                    </div>
+                    <span>Homepage</span>
+                  </div>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -223,10 +269,14 @@ export default function AdminDashboard({
               <SidebarMenuButton 
                 onClick={handleLogout} 
                 variant="ghost" 
-                className="rounded-xl h-12 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                className="group rounded-2xl h-12 text-sidebar-foreground hover:bg-gradient-to-r hover:from-destructive/10 hover:to-destructive/5 hover:text-destructive transition-all duration-300 font-medium"
               >
-                <LogOut className="size-5" />
-                <span>Logout</span>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-sidebar-foreground/5 group-hover:bg-destructive/10 transition-all duration-300">
+                    <LogOut className="size-4" />
+                  </div>
+                  <span>Logout</span>
+                </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

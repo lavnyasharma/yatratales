@@ -1,3 +1,4 @@
+'use client';
 
 import Image from 'next/image';
 import { Button } from "@/components/ui/button"
@@ -11,10 +12,12 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Check, MoreHorizontal, Star, Trash, X } from 'lucide-react';
+import { Check, MoreHorizontal, Star, Trash, X, MessageSquareQuote, Users, CheckCircle, Clock, ThumbsUp, Search, Filter, Download, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import DashboardCard from '@/components/admin/DashboardCard';
 
 
 const getPlaceholder = (id: string) => PlaceHolderImages.find(p => p.id === id);
@@ -26,87 +29,197 @@ const mockReviews = [
   { id: '3', name: 'Jane Doe', imageId: 'avatar-placeholder', rating: 4, comment: 'Great trip overall, but one of the hotel check-ins was a bit slow. Otherwise, fantastic.', status: 'Pending', package: 'Sunsets in Santorini' },
 ];
 
-export default function ReviewsAdminPage() {
+const totalTestimonialsCount = mockReviews.length;
+const pendingTestimonialsCount = mockReviews.filter(r => r.status === 'Pending').length;
+const approvedTestimonialsCount = mockReviews.filter(r => r.status === 'Approved').length;
+const avgRating = mockReviews.length > 0 
+  ? (mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length).toFixed(1)
+  : '0.0';
+
+export default function TestimonialsAdminPage() {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-            <div>
-                <CardTitle>Customer Reviews</CardTitle>
-                <CardDescription>Manage customer feedback and reviews for your packages.</CardDescription>
-            </div>
+    <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Customer Testimonials
+          </h2>
+          <p className="text-muted-foreground text-lg">Manage customer feedback and testimonials for your packages</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px]">Author</TableHead>
-              <TableHead>Comment</TableHead>
-              <TableHead>Package</TableHead>
-              <TableHead className="text-center">Rating</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>
-                <span className="sr-only">Actions</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mockReviews.map((review) => {
-              const image = getPlaceholder(review.imageId);
-              return (
-              <TableRow key={review.id} className={review.status === 'Pending' ? 'bg-secondary/50' : ''}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={image?.imageUrl} alt={review.name} data-ai-hint={image?.imageHint} />
-                      <AvatarFallback>{review.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span>{review.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground max-w-sm">
-                    <p className="line-clamp-2">{review.comment}</p>
-                </TableCell>
-                 <TableCell className="text-muted-foreground">{review.package}</TableCell>
-                <TableCell className="text-center">
-                    <div className="flex items-center justify-center">
-                        {review.rating} <Star className="ml-1 h-4 w-4 text-yellow-500 fill-current" />
-                    </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={review.status === 'Approved' ? "default" : "secondary"}>
-                    {review.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      {review.status === 'Pending' && (
-                        <DropdownMenuItem>
-                            <Check className="mr-2 h-4 w-4 text-green-500"/> Approve
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem className="text-destructive">
-                        <Trash className="mr-2 h-4 w-4"/> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            )})}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  )
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input 
+              placeholder="Search testimonials..." 
+              className="pl-10 w-64 bg-white/50 backdrop-blur-sm border-primary/20 focus:border-primary/40"
+            />
+          </div>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+        </div>
+      </div>
+      
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <DashboardCard 
+          title="Total Testimonials"
+          count={totalTestimonialsCount}
+          description="All customer testimonials"
+          icon={<MessageSquareQuote className="h-6 w-6 text-primary" />}
+          trend={{ value: 18.5, isPositive: true }}
+        />
+        <DashboardCard 
+          title="Pending Testimonials"
+          count={pendingTestimonialsCount}
+          description="Awaiting approval"
+          icon={<Clock className="h-6 w-6 text-primary" />}
+          trend={{ value: 12.3, isPositive: false }}
+        />
+        <DashboardCard 
+          title="Approved Testimonials"
+          count={approvedTestimonialsCount}
+          description="Published testimonials"
+          icon={<CheckCircle className="h-6 w-6 text-primary" />}
+          trend={{ value: 25.7, isPositive: true }}
+        />
+        <DashboardCard 
+          title="Avg. Rating"
+          count={avgRating}
+          description="Average customer rating"
+          icon={<ThumbsUp className="h-6 w-6 text-primary" />}
+          trend={{ value: 3.8, isPositive: true }}
+        />
+      </div>
+      
+      {/* Testimonials Table */}
+      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-muted/30 to-transparent">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              Testimonial Management
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Manage customer feedback and testimonials for your packages
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="font-medium">
+              {mockReviews.length} Total
+            </Badge>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Eye className="h-4 w-4" />
+              View All
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-xl border border-border/50 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-gradient-to-r from-muted/80 to-muted/40">
+                <TableRow className="border-border/50 hover:bg-transparent">
+                  <TableHead className="font-semibold text-foreground/90 py-4 w-[200px]">Author</TableHead>
+                  <TableHead className="font-semibold text-foreground/90">Comment</TableHead>
+                  <TableHead className="font-semibold text-foreground/90">Package</TableHead>
+                  <TableHead className="font-semibold text-foreground/90 text-center">Rating</TableHead>
+                  <TableHead className="font-semibold text-foreground/90">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground/90 w-12">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockReviews.map((review) => {
+                  const image = getPlaceholder(review.imageId);
+                  return (
+                    <TableRow 
+                      key={review.id} 
+                      className={`hover:bg-gradient-to-r hover:from-primary/[0.02] hover:to-transparent transition-all duration-200 border-border/30 ${review.status === 'Pending' ? 'bg-amber-50/50' : ''}`}
+                    >
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={image?.imageUrl} alt={review.name} data-ai-hint={image?.imageHint} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-semibold">
+                              {review.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-semibold text-foreground">{review.name}</div>
+                            <div className="text-sm text-muted-foreground">Customer</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-md py-4">
+                        <p className="line-clamp-2 text-foreground/80 leading-relaxed">{review.comment}</p>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <div className="font-medium text-foreground">{review.package}</div>
+                      </TableCell>
+                      <TableCell className="text-center py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                className={`h-4 w-4 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-muted-foreground'}`} 
+                              />
+                            ))}
+                          </div>
+                          <span className="font-bold text-foreground">{review.rating}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={review.status === 'Approved' ? "default" : "secondary"}
+                          className={review.status === 'Pending' 
+                            ? 'bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200' 
+                            : review.status === 'Approved' 
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                            : ''
+                          }
+                        >
+                          {review.status === 'Approved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                          {review.status === 'Pending' && <Clock className="w-3 h-3 mr-1" />}
+                          {review.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-primary/10">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            {review.status === 'Pending' && (
+                              <DropdownMenuItem className="gap-2">
+                                <Check className="h-4 w-4 text-green-500"/> Approve Testimonial
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem className="text-destructive gap-2">
+                              <Trash className="h-4 w-4"/> Delete Testimonial
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
     

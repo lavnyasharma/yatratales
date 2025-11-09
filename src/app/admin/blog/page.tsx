@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { PlusCircle, MoreHorizontal, FileText, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, FileText, CheckCircle, Sparkles, Loader2, Search, Filter, Download, Eye, Edit, Calendar } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import DashboardCard from '@/components/admin/DashboardCard';
@@ -78,103 +79,218 @@ export default function BlogAdminPage() {
 }
 
   return (
-    <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-             <DashboardCard 
-                title="Published Posts"
-                count={publishedCount}
-                description="Total live blog posts"
-                icon={<CheckCircle className="h-4 w-4 text-muted-foreground" />}
-            />
-             <DashboardCard 
-                title="Draft Posts"
-                count={draftCount}
-                description="Posts saved as drafts"
-                icon={<FileText className="h-4 w-4 text-muted-foreground" />}
-            />
+    <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Blog Posts
+          </h2>
+          <p className="text-muted-foreground text-lg">Create and manage your travel blog articles</p>
         </div>
-        <Card>
-        <CardHeader>
-            <div className="flex items-center justify-between">
-                <div>
-                    <CardTitle>Blog Posts</CardTitle>
-                    <CardDescription>Create and manage your travel blog articles.</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button onClick={handleSeedData} variant="outline" disabled={isSeeding}>
-                        {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        Seed Data
-                    </Button>
-                    <Button asChild>
-                        <Link href="/admin/blog/new">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            New Post
-                        </Link>
-                    </Button>
-                </div>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input 
+              placeholder="Search blog posts..." 
+              className="pl-10 w-64 bg-white/50 backdrop-blur-sm border-primary/20 focus:border-primary/40"
+            />
+          </div>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+        </div>
+      </div>
+      
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <DashboardCard 
+          title="Published Posts"
+          count={publishedCount}
+          description="Total live blog posts"
+          icon={<CheckCircle className="h-6 w-6 text-primary" />}
+          trend={{ value: 14.8, isPositive: true }}
+        />
+        <DashboardCard 
+          title="Draft Posts"
+          count={draftCount}
+          description="Posts saved as drafts"
+          icon={<FileText className="h-6 w-6 text-primary" />}
+          trend={{ value: 7.2, isPositive: false }}
+        />
+        <DashboardCard 
+          title="Total Posts"
+          count={(blogPosts?.length || 0)}
+          description="All blog posts"
+          icon={<Edit className="h-6 w-6 text-primary" />}
+          trend={{ value: 9.5, isPositive: true }}
+        />
+      </div>
+      {/* Blog Posts Table */}
+      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-muted/30 to-transparent">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              Blog Management
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Create and manage your travel blog articles
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="font-medium">
+              {blogPosts?.length || 0} Total
+            </Badge>
+            <Button onClick={handleSeedData} variant="outline" disabled={isSeeding} size="sm" className="gap-2">
+              {isSeeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Seed Data
+            </Button>
+            <Button asChild size="sm" className="gap-2">
+              <Link href="/admin/blog/new">
+                <PlusCircle className="h-4 w-4" />
+                New Post
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-            {isLoading && <p className="text-center py-4">Loading posts...</p>}
-            <Table>
-            <TableHeader>
-                <TableRow>
-                <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Publish Date</TableHead>
-                <TableHead>
-                    <span className="sr-only">Actions</span>
-                </TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {blogPosts?.map((post) => {
-                const image = getPlaceholder(post.imageId || 'blog-1');
-                return (
-                <TableRow key={post.id}>
-                    <TableCell className="hidden sm:table-cell">
-                    <Image
-                        alt={post.title}
-                        className="aspect-square rounded-md object-cover"
-                        height="64"
-                        src={image?.imageUrl || ''}
-                        width="64"
-                        data-ai-hint={image?.imageHint}
-                    />
-                    </TableCell>
-                    <TableCell className="font-medium">{post.title}</TableCell>
-                    <TableCell>
-                    <Badge variant={post.status === 'Published' ? "default" : "secondary"}>
-                        {post.status}
-                    </Badge>
-                    </TableCell>
-                    <TableCell>{post.publishDate ? new Date(post.publishDate).toLocaleDateString() : 'N/A'}</TableCell>
-                    <TableCell>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem asChild><Link href={`/admin/blog/edit/${post.id}`}>Edit</Link></DropdownMenuItem>
-                        <DropdownMenuItem asChild><Link href={`/blog/${post.id}`} target="_blank">View</Link></DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(post.id)}>Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    </TableCell>
-                </TableRow>
-                )})}
-            </TableBody>
-            </Table>
-             {!isLoading && blogPosts?.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">No blog posts found.</p>
-             )}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center space-y-4">
+                <div className="relative">
+                  <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary/20 border-r-primary align-[-0.125em]"></div>
+                  <div className="absolute inset-0 inline-block h-12 w-12 animate-ping rounded-full border-4 border-primary/10"></div>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-medium text-foreground">Loading blog posts...</p>
+                  <p className="text-sm text-muted-foreground">Please wait while we fetch your data</p>
+                </div>
+              </div>
+            </div>
+          ) : !blogPosts || blogPosts.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="relative">
+                <div className="mx-auto h-20 w-20 bg-gradient-to-br from-muted to-muted/50 rounded-full flex items-center justify-center">
+                  <FileText className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <div className="absolute inset-0 mx-auto h-20 w-20 bg-primary/5 rounded-full animate-pulse"></div>
+              </div>
+              <div className="mt-6 space-y-2">
+                <h3 className="text-lg font-semibold text-foreground">No blog posts found</h3>
+                <p className="text-muted-foreground max-w-sm mx-auto">Get started by creating a new blog post or seed some sample data.</p>
+              </div>
+              <div className="mt-6">
+                <Button onClick={handleSeedData} variant="outline" disabled={isSeeding}>
+                  {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                  Seed Data
+                </Button>
+                <Button asChild className="ml-2">
+                  <Link href="/admin/blog/new">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    New Post
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-border/50 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-gradient-to-r from-muted/80 to-muted/40">
+                  <TableRow className="border-border/50 hover:bg-transparent">
+                    <TableHead className="font-semibold text-foreground/90 py-4 hidden w-[100px] sm:table-cell">Image</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Title</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Publish Date</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 w-12">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {blogPosts?.map((post) => {
+                    const image = getPlaceholder(post.imageId || 'blog-1');
+                    return (
+                      <TableRow key={post.id} className="hover:bg-gradient-to-r hover:from-primary/[0.02] hover:to-transparent transition-all duration-200 border-border/30">
+                        <TableCell className="hidden sm:table-cell py-4">
+                          <div className="relative h-14 w-14 overflow-hidden rounded-xl shadow-sm">
+                            <Image
+                              alt={post.title}
+                              className="object-cover"
+                              fill
+                              src={image?.imageUrl || ''}
+                              data-ai-hint={image?.imageHint}
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="space-y-1">
+                            <div className="font-semibold text-foreground">{post.title}</div>
+                            <div className="text-sm text-muted-foreground">Blog Article</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={post.status === 'Published' ? "default" : "secondary"}
+                            className={post.status === 'Published' 
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-200' 
+                              : 'bg-amber-100 text-amber-800 border-amber-200'
+                            }
+                          >
+                            {post.status === 'Published' && <CheckCircle className="w-3 h-3 mr-1" />}
+                            {post.status === 'Draft' && <Edit className="w-3 h-3 mr-1" />}
+                            {post.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Calendar className="w-4 h-4" />
+                            <span className="font-medium">
+                              {post.publishDate ? new Date(post.publishDate).toLocaleDateString() : 'N/A'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-primary/10">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem asChild className="gap-2">
+                                <Link href={`/admin/blog/edit/${post.id}`}>
+                                  <Edit className="h-4 w-4" />
+                                  Edit Post
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild className="gap-2">
+                                <Link href={`/blog/${post.id}`} target="_blank">
+                                  <Eye className="h-4 w-4" />
+                                  View Live
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive gap-2" onClick={() => handleDelete(post.id)}>
+                                <Download className="h-4 w-4" />
+                                Delete Post
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
-        </Card>
+      </Card>
     </div>
   )
 }

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlusCircle, MoreHorizontal, Loader2, Sparkles, Package, Star, MapPin, IndianRupee } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Loader2, Sparkles, Package, Star, MapPin, IndianRupee, Search, Filter, Download, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useCollection, useFirebase, useMemoFirebase, errorEmitter } from '@/firebase';
@@ -87,50 +88,77 @@ export default function PackagesAdminPage() {
     }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Travel Packages</h2>
-        <p className="text-muted-foreground">Manage your travel packages and experiences</p>
+    <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Travel Packages
+          </h2>
+          <p className="text-muted-foreground text-lg">Manage your travel packages and experiences</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input 
+              placeholder="Search packages..." 
+              className="pl-10 w-64 bg-white/50 backdrop-blur-sm border-primary/20 focus:border-primary/40"
+            />
+          </div>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+        </div>
       </div>
       
+      {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <DashboardCard 
           title="Total Packages"
           count={totalPackagesCount}
           description="Active travel packages"
           icon={<Package className="h-6 w-6 text-primary" />}
-          className="border-l-4 border-l-primary"
+          trend={{ value: 8.5, isPositive: true }}
         />
         <DashboardCard 
           title="Featured Packages"
           count={featuredPackagesCount}
           description="Packages on homepage"
           icon={<Star className="h-6 w-6 text-primary" />}
-          className="border-l-4 border-l-primary"
+          trend={{ value: 12.3, isPositive: true }}
         />
         <DashboardCard 
           title="Destinations"
           count={new Set(packagesData?.map(p => p.location)).size || 0}
           description="Unique travel destinations"
           icon={<MapPin className="h-6 w-6 text-primary" />}
-          className="border-l-4 border-l-primary"
+          trend={{ value: 5.2, isPositive: true }}
         />
       </div>
       
-      <Card className="shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-xl">Package Management</CardTitle>
+      {/* Packages Table */}
+      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-muted/30 to-transparent">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              Package Management
+            </CardTitle>
             <p className="text-sm text-muted-foreground">Add, edit, or remove travel packages</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={handleSeedData} variant="outline" disabled={isSeeding} size="sm">
-              {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            <Button onClick={handleSeedData} variant="outline" disabled={isSeeding} size="sm" className="gap-2">
+              {isSeeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               Seed Data
             </Button>
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="gap-2">
               <Link href="/admin/packages/new">
-                <PlusCircle className="mr-2 h-4 w-4" />
+                <PlusCircle className="h-4 w-4" />
                 Add Package
               </Link>
             </Button>
@@ -138,10 +166,16 @@ export default function PackagesAdminPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                <p className="mt-2 text-muted-foreground">Loading packages...</p>
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center space-y-4">
+                <div className="relative">
+                  <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary/20 border-r-primary align-[-0.125em]"></div>
+                  <div className="absolute inset-0 inline-block h-12 w-12 animate-ping rounded-full border-4 border-primary/10"></div>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-medium text-foreground">Loading packages...</p>
+                  <p className="text-sm text-muted-foreground">Please wait while we fetch your data</p>
+                </div>
               </div>
             </div>
           ) : error ? (
@@ -156,10 +190,17 @@ export default function PackagesAdminPage() {
               </div>
             </div>
           ) : !packagesData || packagesData.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 font-medium">No packages found</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Get started by adding a new travel package.</p>
+            <div className="text-center py-16">
+              <div className="relative">
+                <div className="mx-auto h-20 w-20 bg-gradient-to-br from-muted to-muted/50 rounded-full flex items-center justify-center">
+                  <Package className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <div className="absolute inset-0 mx-auto h-20 w-20 bg-primary/5 rounded-full animate-pulse"></div>
+              </div>
+              <div className="mt-6 space-y-2">
+                <h3 className="text-lg font-semibold text-foreground">No packages found</h3>
+                <p className="text-muted-foreground max-w-sm mx-auto">Get started by adding a new travel package or seed some sample data.</p>
+              </div>
               <div className="mt-6">
                 <Button onClick={handleSeedData} variant="outline" disabled={isSeeding}>
                   {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
@@ -174,18 +215,16 @@ export default function PackagesAdminPage() {
               </div>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="rounded-xl border border-border/50 overflow-hidden">
               <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow>
-                    <TableHead className="font-medium hidden w-[100px] sm:table-cell">Image</TableHead>
-                    <TableHead className="font-medium">Package</TableHead>
-                    <TableHead className="font-medium">Location</TableHead>
-                    <TableHead className="font-medium">Status</TableHead>
-                    <TableHead className="font-medium text-right">Price</TableHead>
-                    <TableHead className="font-medium">
-                      <span className="sr-only">Actions</span>
-                    </TableHead>
+                <TableHeader className="bg-gradient-to-r from-muted/80 to-muted/40">
+                  <TableRow className="border-border/50 hover:bg-transparent">
+                    <TableHead className="font-semibold text-foreground/90 py-4 hidden w-[100px] sm:table-cell">Image</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Package</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Location</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Price</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 w-12">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -205,10 +244,10 @@ export default function PackagesAdminPage() {
                     
                     const minPrice = pkg.pricing?.[0]?.rates?.[0]?.price || 0;
                     return (
-                      <TableRow key={pkg.id} className="hover:bg-muted/50">
-                        <TableCell className="hidden sm:table-cell">
+                      <TableRow key={pkg.id} className="hover:bg-gradient-to-r hover:from-primary/[0.02] hover:to-transparent transition-all duration-200 border-border/30">
+                        <TableCell className="hidden sm:table-cell py-4">
                           {image ? (
-                            <div className="relative h-12 w-12 overflow-hidden rounded-md">
+                            <div className="relative h-14 w-14 overflow-hidden rounded-xl shadow-sm">
                               <Image
                                 alt={pkg.title}
                                 className="object-cover"
@@ -218,51 +257,68 @@ export default function PackagesAdminPage() {
                               />
                             </div>
                           ) : (
-                            <div className="bg-muted border rounded-md h-12 w-12 flex items-center justify-center">
-                              <Package className="h-5 w-5 text-muted-foreground" />
+                            <div className="bg-gradient-to-br from-muted to-muted/50 border rounded-xl h-14 w-14 flex items-center justify-center shadow-sm">
+                              <Package className="h-6 w-6 text-muted-foreground" />
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <div className="font-medium">{pkg.title}</div>
-                          <div className="text-sm text-muted-foreground md:hidden">
-                            {pkg.duration}
+                        <TableCell className="py-4">
+                          <div className="space-y-1">
+                            <div className="font-semibold text-foreground">{pkg.title}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {pkg.duration}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                            <span>{pkg.location}</span>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="h-4 w-4" />
+                            <span className="font-medium">{pkg.location}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={pkg.featured ? "default" : "secondary"}>
+                          <Badge 
+                            variant={pkg.featured ? "default" : "secondary"} 
+                            className={pkg.featured ? "bg-primary/10 text-primary border-primary/20" : ""}
+                          >
+                            <Star className={`w-3 h-3 mr-1 ${pkg.featured ? 'fill-current' : ''}`} />
                             {pkg.featured ? "Featured" : "Standard"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right font-semibold">
-                          <div className="flex items-center justify-end">
-                            <IndianRupee className="h-4 w-4" />
-                            {minPrice.toLocaleString('en-IN')}
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-bold text-lg text-foreground">
+                              {minPrice.toLocaleString('en-IN')}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-primary/10">
                                 <MoreHorizontal className="h-4 w-4" />
                                 <span className="sr-only">Toggle menu</span>
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/admin/packages/edit/${pkg.id}`}>Edit</Link>
+                              <DropdownMenuItem asChild className="gap-2">
+                                <Link href={`/admin/packages/edit/${pkg.id}`}>
+                                  <Eye className="h-4 w-4" />
+                                  Edit Package
+                                </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/packages/${pkg.id}`} target="_blank">View</Link>
+                              <DropdownMenuItem asChild className="gap-2">
+                                <Link href={`/packages/${pkg.id}`} target="_blank">
+                                  <Eye className="h-4 w-4" />
+                                  View Live
+                                </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(pkg.id)}>Delete</DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive gap-2" onClick={() => handleDelete(pkg.id)}>
+                                <Download className="h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
