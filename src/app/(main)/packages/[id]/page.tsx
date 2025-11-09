@@ -53,9 +53,33 @@ const getPlaceholder = (id: string) => PlaceHolderImages.find((p) => p.id === id
 
 
 function HeroSection({ travelPackage }: { travelPackage: TravelPackage }) {
-    const { title, duration, location, imageIds } = travelPackage;
-    const images = (imageIds || []).map(id => getPlaceholder(id)).filter(Boolean);
-    const bgImage = getPlaceholder(imageIds?.[2] || 'package-kerala-bg');
+    const { title, duration, location, imageIds, imageUrls } = travelPackage;
+    
+    // Use imageUrls if available, otherwise fallback to imageIds
+    let images = [];
+    if (imageUrls && imageUrls.length > 0) {
+        images = imageUrls.map(url => ({
+            id: '',
+            description: '',
+            imageUrl: url,
+            imageHint: ''
+        }));
+    } else {
+        images = (imageIds || []).map(id => getPlaceholder(id)).filter(Boolean);
+    }
+    
+    // Background image
+    let bgImage = null;
+    if (imageUrls && imageUrls.length > 2) {
+        bgImage = {
+            id: '',
+            description: '',
+            imageUrl: imageUrls[2],
+            imageHint: ''
+        };
+    } else {
+        bgImage = getPlaceholder(imageIds?.[2] || 'package-kerala-bg');
+    }
 
     return (
         <section className="relative bg-secondary/30 pt-12 pb-8 overflow-hidden">

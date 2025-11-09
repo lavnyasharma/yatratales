@@ -21,6 +21,8 @@ import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle, Trash2 } from "lucide-react";
+import ImageUpload from "@/components/admin/ImageUpload";
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const packageSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
@@ -34,7 +36,7 @@ const packageSchema = z.object({
   terms: z.string().optional(),
   validity: z.string().optional(),
   featured: z.boolean().default(false),
-  imageIds: z.array(z.string()).default(['package-kerala-1', 'package-kerala-2', 'package-kerala-bg']),
+  imageUrls: z.array(z.string()).default([]),
   pricing: z.array(z.object({
     stars: z.coerce.number().min(1),
     rates: z.array(z.object({
@@ -115,6 +117,10 @@ export default function PackageForm({ initialData, packageId }: { initialData?: 
     resolver: zodResolver(packageSchema),
     defaultValues: {
       ...initialData,
+      imageUrls: initialData?.imageUrls || (initialData as any)?.imageIds?.map((id: string) => {
+        const placeholder = PlaceHolderImages.find(img => img.id === id);
+        return placeholder ? placeholder.imageUrl : '';
+      }) || [],
       inclusions: initialData?.inclusions || [],
       exclusions: initialData?.exclusions || [],
       transfers: initialData?.transfers || [],
@@ -128,13 +134,42 @@ export default function PackageForm({ initialData, packageId }: { initialData?: 
   async function onSubmit(data: PackageFormValues) {
     if (!firestore) return;
     try {
-        const dataToSave = {
-            ...data,
-            // Ensure array fields are stored as arrays
-            inclusions: Array.isArray(data.inclusions) ? data.inclusions : stringToArray(data.inclusions as any),
-            exclusions: Array.isArray(data.exclusions) ? data.exclusions : stringToArray(data.exclusions as any),
-            transfers: Array.isArray(data.transfers) ? data.transfers : stringToArray(data.transfers as any),
-        };
+        // Remove undefined values and transform data for saving
+        const dataToSave: Record<string, any> = {};
+        
+        // Copy all defined values
+        Object.keys(data).forEach(key => {
+            const value = (data as any)[key];
+            if (value !== undefined) {
+                dataToSave[key] = value;
+            }
+        });
+        
+        // Transform imageUrls to separate uploaded URLs and placeholder image IDs
+        // Uploaded images go to imageUrls, placeholder images go to imageIds
+        const uploadedImages: string[] = [];
+        const placeholderImageIds: string[] = [];
+        
+        data.imageUrls.forEach(url => {
+          // Try to find if this URL matches a placeholder image
+          const placeholder = PlaceHolderImages.find(img => img.imageUrl === url);
+          if (placeholder) {
+            // It's a placeholder image, add to imageIds
+            placeholderImageIds.push(placeholder.id);
+          } else {
+            // It's an uploaded image, add to imageUrls
+            uploadedImages.push(url);
+          }
+        });
+        
+        // Store the separated data
+        dataToSave.imageUrls = uploadedImages;
+        dataToSave.imageIds = placeholderImageIds;
+        
+        // Ensure array fields are stored as arrays
+        dataToSave.inclusions = Array.isArray(data.inclusions) ? data.inclusions : stringToArray(data.inclusions as any);
+        dataToSave.exclusions = Array.isArray(data.exclusions) ? data.exclusions : stringToArray(data.exclusions as any);
+        dataToSave.transfers = Array.isArray(data.transfers) ? data.transfers : stringToArray(data.transfers as any);
 
         if (packageId) {
             const packageDoc = doc(firestore, "travelPackages", packageId);
@@ -193,6 +228,12 @@ export default function PackageForm({ initialData, packageId }: { initialData?: 
                 )} />
             </CardContent>
         </Card>
+
+        <ImageUpload 
+          maxImages={5}
+          existingImages={form.watch("imageUrls")}
+          onImagesUploaded={(imageUrls) => form.setValue("imageUrls", imageUrls)}
+        />
 
         <Card>
             <CardHeader>

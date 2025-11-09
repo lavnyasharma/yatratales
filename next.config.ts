@@ -45,6 +45,18 @@ const nextConfig: NextConfig = {
         hostname: 'demo2.pavothemes.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'studio-4045740230-a0fa4.firebasestorage.app',
+        port: '',
+        pathname: '/**',
       }
     ],
   },

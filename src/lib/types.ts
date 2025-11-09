@@ -28,11 +28,12 @@ export interface TravelPackage {
   duration: string; // e.g., "7 Days / 6 Nights"
   description: string;
   imageIds: string[];
+  imageUrls: string[];
   itinerary: string;
   inclusions: string[];
   exclusions: string[];
   transfers?: string[];
-  terms: string;
+  terms?: string;
   validity?: string;
   featured?: boolean;
   pricing: PricingTier[];

@@ -13,9 +13,20 @@ type PackageCardProps = {
 }
 
 export default function PackageCard({ packageData }: PackageCardProps) {
-    const { id, title, location, duration, pricing, imageIds, description } = packageData;
-    // Use the first image from the imageIds array, with a fallback
-    const image = getPlaceholder(imageIds?.[0] || 'package-alps');
+    const { id, title, location, duration, pricing, imageIds, imageUrls, description } = packageData;
+    
+    // Use imageUrls if available, otherwise fallback to imageIds
+    let image = null;
+    if (imageUrls && imageUrls.length > 0) {
+        image = {
+            id: '',
+            description: '',
+            imageUrl: imageUrls[0],
+            imageHint: ''
+        };
+    } else {
+        image = getPlaceholder(imageIds?.[0] || 'package-alps');
+    }
 
     const minPrice = pricing?.[0]?.rates?.[0]?.price || 0;
 
