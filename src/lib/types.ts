@@ -17,8 +17,8 @@ export interface HotelOption {
 }
 
 export interface ItinerarySummaryItem {
-    nights: number;
-    location: string;
+  nights: number;
+  location: string;
 }
 
 export interface TravelPackage {
@@ -27,6 +27,7 @@ export interface TravelPackage {
   location: string;
   duration: string; // e.g., "7 Days / 6 Nights"
   description: string;
+  packageType?: 'international' | 'domestic';
   imageIds: string[];
   imageUrls: string[];
   itinerary: string;
@@ -50,7 +51,7 @@ export interface Booking {
   packageId: string;
   packageName: string;
   travellers: number;
-  bookingDate: Timestamp; 
+  bookingDate: Timestamp;
   total: number;
   addons?: string[];
 }
@@ -76,8 +77,7 @@ export interface BlogPost {
   author: string;
 }
 
-export interface AppUser extends FirebaseUser {}
+export interface AppUser extends FirebaseUser { }
 
-    
 
-    
+

@@ -16,13 +16,13 @@ function PackagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const packagesQuery = useMemoFirebase(
     () => (firestore ? collection(firestore, 'travelPackages') : null),
     [firestore]
   );
   const { data: allPackages, isLoading } = useCollection<TravelPackage>(packagesQuery);
-  
+
   // Initialize search query from URL params
   useEffect(() => {
     const searchParam = searchParams.get('search');
@@ -30,21 +30,34 @@ function PackagesContent() {
       setSearchQuery(searchParam);
     }
   }, [searchParams]);
-  
-  // Filter packages based on search query
+
+  // Filter packages based on search query and package type
   const filteredPackages = useMemo(() => {
-    if (!allPackages || !searchQuery.trim()) {
-      return allPackages || [];
+    if (!allPackages) {
+      return [];
     }
-    
-    const query = searchQuery.toLowerCase();
-    return allPackages.filter(pkg => 
-      pkg.title.toLowerCase().includes(query) ||
-      pkg.location.toLowerCase().includes(query) ||
-      pkg.description.toLowerCase().includes(query)
-    );
-  }, [allPackages, searchQuery]);
-  
+
+    let filtered = allPackages;
+
+    // Filter by package type if specified in URL
+    const typeParam = searchParams.get('type');
+    if (typeParam === 'international' || typeParam === 'domestic') {
+      filtered = filtered.filter(pkg => pkg.packageType === typeParam);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(pkg =>
+        pkg.title.toLowerCase().includes(query) ||
+        pkg.location.toLowerCase().includes(query) ||
+        pkg.description.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [allPackages, searchQuery, searchParams]);
+
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,39 +67,56 @@ function PackagesContent() {
       router.push('/packages');
     }
   };
-  
+
   // Clear search
   const clearSearch = () => {
     setSearchQuery('');
-    router.push('/packages');
+    const typeParam = searchParams.get('type');
+    if (typeParam) {
+      router.push(`/packages?type=${typeParam}`);
+    } else {
+      router.push('/packages');
+    }
+  };
+
+  const typeParam = searchParams.get('type');
+  const getPageTitle = () => {
+    if (searchQuery) return `Search Results for "${searchQuery}"`;
+    if (typeParam === 'international') return 'International Packages';
+    if (typeParam === 'domestic') return 'Domestic Packages';
+    return 'Explore Our Packages';
+  };
+
+  const getPageDescription = () => {
+    if (searchQuery) return `Found ${filteredPackages.length} packages matching your search`;
+    if (typeParam === 'international') return 'Discover amazing destinations around the world';
+    if (typeParam === 'domestic') return 'Explore the beauty of India with our curated domestic tours';
+    return 'Find your next adventure from our collection of expertly crafted travel experiences.';
   };
 
   return (
     <div className="container py-12">
-        <Breadcrumb className="mb-8">
-            <BreadcrumbList>
-                <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                <BreadcrumbPage>All Packages</BreadcrumbPage>
-                </BreadcrumbItem>
-            </BreadcrumbList>
-        </Breadcrumb>
+      <Breadcrumb className="mb-8">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>All Packages</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-headline font-bold">
-          {searchQuery ? `Search Results for "${searchQuery}"` : 'Explore Our Packages'}
+          {getPageTitle()}
         </h1>
         <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-          {searchQuery 
-            ? `Found ${filteredPackages.length} packages matching your search`
-            : 'Find your next adventure from our collection of expertly crafted travel experiences.'
-          }
+          {getPageDescription()}
         </p>
       </div>
-      
+
       {/* Search Bar */}
       <div className="max-w-2xl mx-auto mb-12">
         <form onSubmit={handleSearch}>
@@ -118,7 +148,7 @@ function PackagesContent() {
           </div>
         </form>
       </div>
-      
+
       {/* Results */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -184,4 +214,4 @@ export default function AllPackagesPage() {
   );
 }
 
-    
+

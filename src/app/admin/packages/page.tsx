@@ -30,62 +30,69 @@ import type { TravelPackage } from '@/lib/types';
 const getPlaceholder = (id: string) => PlaceHolderImages.find(p => p.id === id);
 
 export default function PackagesAdminPage() {
-    const { firestore } = useFirebase();
-    const [isSeeding, setIsSeeding] = useState(false);
+  const { firestore } = useFirebase();
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [packageTypeFilter, setPackageTypeFilter] = useState<'all' | 'international' | 'domestic'>('all');
 
-    const packagesQuery = useMemoFirebase(
-      () => (firestore ? collection(firestore, 'travelPackages') : null),
-      [firestore]
-    );
-    const { data: packagesData, isLoading, error, refetch } = useCollection<TravelPackage>(packagesQuery);
-    
-    const featuredPackagesCount = packagesData?.filter(p => p.featured).length || 0;
-    const totalPackagesCount = packagesData?.length || 0;
+  const packagesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'travelPackages') : null),
+    [firestore]
+  );
+  const { data: allPackagesData, isLoading, error, refetch } = useCollection<TravelPackage>(packagesQuery);
 
-    const handleDelete = async (id: string) => {
-      if (!firestore) return;
+  // Filter packages based on type
+  const packagesData = allPackagesData?.filter(pkg => {
+    if (packageTypeFilter === 'all') return true;
+    return pkg.packageType === packageTypeFilter;
+  });
 
-      const docRef = doc(firestore, 'travelPackages', id);
-      try {
-        await deleteDoc(docRef);
-        toast({
-          title: 'Package Deleted',
-          description: 'The travel package has been successfully deleted.',
-        });
-      } catch (error: any) {
-        errorEmitter.emit(
-          'permission-error',
-          new FirestorePermissionError({
-            path: docRef.path,
-            operation: 'delete',
-          })
-        );
-        toast({
-          title: 'Error Deleting Package',
-          description: error.message || 'Could not delete the package. Please check permissions.',
-          variant: 'destructive',
-        });
-      }
-    };
+  const featuredPackagesCount = packagesData?.filter(p => p.featured).length || 0;
+  const totalPackagesCount = packagesData?.length || 0;
 
-    const handleSeedData = async () => {
-        setIsSeeding(true);
-        const result = await seedDataAction();
-        if (result.success) {
-            toast({
-                title: 'Database Seeded!',
-                description: 'Your Firestore database has been populated with travel packages.',
-            });
-            refetch();
-        } else {
-            toast({
-                title: 'Seeding Failed',
-                description: result.error || 'An unknown error occurred.',
-                variant: 'destructive',
-            });
-        }
-        setIsSeeding(false);
+  const handleDelete = async (id: string) => {
+    if (!firestore) return;
+
+    const docRef = doc(firestore, 'travelPackages', id);
+    try {
+      await deleteDoc(docRef);
+      toast({
+        title: 'Package Deleted',
+        description: 'The travel package has been successfully deleted.',
+      });
+    } catch (error: any) {
+      errorEmitter.emit(
+        'permission-error',
+        new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        })
+      );
+      toast({
+        title: 'Error Deleting Package',
+        description: error.message || 'Could not delete the package. Please check permissions.',
+        variant: 'destructive',
+      });
     }
+  };
+
+  const handleSeedData = async () => {
+    setIsSeeding(true);
+    const result = await seedDataAction();
+    if (result.success) {
+      toast({
+        title: 'Database Seeded!',
+        description: 'Your Firestore database has been populated with travel packages.',
+      });
+      refetch();
+    } else {
+      toast({
+        title: 'Seeding Failed',
+        description: result.error || 'An unknown error occurred.',
+        variant: 'destructive',
+      });
+    }
+    setIsSeeding(false);
+  }
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
@@ -100,39 +107,55 @@ export default function PackagesAdminPage() {
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input 
-              placeholder="Search packages..." 
+            <Input
+              placeholder="Search packages..."
               className="pl-10 w-64 bg-white/50 backdrop-blur-sm border-primary/20 focus:border-primary/40"
             />
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Filter className="h-4 w-4" />
+                {packageTypeFilter === 'all' ? 'All Types' : packageTypeFilter === 'international' ? 'International' : 'Domestic'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setPackageTypeFilter('all')}>
+                All Types
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPackageTypeFilter('international')}>
+                International
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPackageTypeFilter('domestic')}>
+                Domestic
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" size="sm" className="gap-2">
             <Download className="h-4 w-4" />
             Export
           </Button>
         </div>
       </div>
-      
+
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <DashboardCard 
+        <DashboardCard
           title="Total Packages"
           count={totalPackagesCount}
           description="Active travel packages"
           icon={<Package className="h-6 w-6 text-primary" />}
           trend={{ value: 8.5, isPositive: true }}
         />
-        <DashboardCard 
+        <DashboardCard
           title="Featured Packages"
           count={featuredPackagesCount}
           description="Packages on homepage"
           icon={<Star className="h-6 w-6 text-primary" />}
           trend={{ value: 12.3, isPositive: true }}
         />
-        <DashboardCard 
+        <DashboardCard
           title="Destinations"
           count={new Set(packagesData?.map(p => p.location)).size || 0}
           description="Unique travel destinations"
@@ -140,7 +163,7 @@ export default function PackagesAdminPage() {
           trend={{ value: 5.2, isPositive: true }}
         />
       </div>
-      
+
       {/* Packages Table */}
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-muted/30 to-transparent">
@@ -222,6 +245,7 @@ export default function PackagesAdminPage() {
                     <TableHead className="font-semibold text-foreground/90 py-4 hidden w-[100px] sm:table-cell">Image</TableHead>
                     <TableHead className="font-semibold text-foreground/90">Package</TableHead>
                     <TableHead className="font-semibold text-foreground/90">Location</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Type</TableHead>
                     <TableHead className="font-semibold text-foreground/90">Status</TableHead>
                     <TableHead className="font-semibold text-foreground/90 text-right">Price</TableHead>
                     <TableHead className="font-semibold text-foreground/90 w-12">Actions</TableHead>
@@ -241,7 +265,7 @@ export default function PackagesAdminPage() {
                     } else {
                       image = getPlaceholder(pkg.imageIds?.[0] || 'package-alps');
                     }
-                    
+
                     const minPrice = pkg.pricing?.[0]?.rates?.[0]?.price || 0;
                     return (
                       <TableRow key={pkg.id} className="hover:bg-gradient-to-r hover:from-primary/[0.02] hover:to-transparent transition-all duration-200 border-border/30">
@@ -277,8 +301,13 @@ export default function PackagesAdminPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge 
-                            variant={pkg.featured ? "default" : "secondary"} 
+                          <Badge variant="outline" className="capitalize">
+                            {pkg.packageType || 'domestic'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={pkg.featured ? "default" : "secondary"}
                             className={pkg.featured ? "bg-primary/10 text-primary border-primary/20" : ""}
                           >
                             <Star className={`w-3 h-3 mr-1 ${pkg.featured ? 'fill-current' : ''}`} />
