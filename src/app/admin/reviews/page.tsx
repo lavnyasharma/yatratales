@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
-  Check, 
-  MoreHorizontal, 
-  Star, 
-  Trash, 
-  MessageSquareQuote, 
-  CheckCircle, 
+import {
+  Check,
+  MoreHorizontal,
+  Star,
+  Trash,
+  MessageSquareQuote,
+  CheckCircle,
   Clock,
   ThumbsUp,
   Search,
@@ -26,12 +26,12 @@ import {
   Eye
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCollection, useFirebase, useMemoFirebase, errorEmitter } from '@/firebase';
@@ -39,65 +39,75 @@ import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
 import DashboardCard from '@/components/admin/DashboardCard';
 import { FirestorePermissionError } from '@/firebase/errors';
-import type { Testimonial } from '@/lib/types';
+import type { Testimonial, TravelPackage } from '@/lib/types';
 
 export default function ReviewsAdminPage() {
-    const { firestore } = useFirebase();
+  const { firestore } = useFirebase();
 
-    const testimonialsQuery = useMemoFirebase(
-      () => (firestore ? collection(firestore, 'testimonials') : null),
-      [firestore]
-    );
-    const { data: reviews, isLoading } = useCollection<Testimonial>(testimonialsQuery);
+  const testimonialsQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'testimonials') : null),
+    [firestore]
+  );
+  const { data: reviews, isLoading } = useCollection<Testimonial>(testimonialsQuery);
 
-    const pendingReviewsCount = reviews?.filter(r => r.status === 'Pending').length || 0;
-    const approvedReviewsCount = reviews?.filter(r => r.status === 'Approved').length || 0;
-    const totalReviewsCount = reviews?.length || 0;
+  // Fetch packages to show package names
+  const packagesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'travelPackages') : null),
+    [firestore]
+  );
+  const { data: packages } = useCollection<TravelPackage>(packagesQuery);
 
-    const handleApprove = async (id: string) => {
-        if (!firestore) return;
-        const reviewDoc = doc(firestore, 'testimonials', id);
-        try {
-            await updateDoc(reviewDoc, { status: 'Approved' });
-            toast({ 
-              title: 'Review Approved',
-              description: 'The customer review has been approved and is now visible.'
-            });
-        } catch (e: any) {
-            toast({ 
-              title: 'Error', 
-              description: e.message, 
-              variant: 'destructive' 
-            });
-        }
-    };
+  // Create a map of package ID to package name
+  const packageMap = new Map(packages?.map(pkg => [pkg.id, pkg.title]) || []);
 
-    const handleDelete = (id: string) => {
-        if (!firestore) return;
-        if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
-        const reviewDoc = doc(firestore, 'testimonials', id);
-        deleteDoc(reviewDoc)
-          .then(() => {
-            toast({ 
-              title: 'Review Deleted',
-              description: 'The customer review has been permanently removed.'
-            });
-          })
-          .catch((e: any) => {
-            errorEmitter.emit(
-              'permission-error',
-              new FirestorePermissionError({
-                path: reviewDoc.path,
-                operation: 'delete',
-              })
-            );
-            toast({ 
-              title: 'Error', 
-              description: e.message, 
-              variant: 'destructive' 
-            });
-          });
+  const pendingReviewsCount = reviews?.filter(r => r.status === 'Pending').length || 0;
+  const approvedReviewsCount = reviews?.filter(r => r.status === 'Approved').length || 0;
+  const totalReviewsCount = reviews?.length || 0;
+
+  const handleApprove = async (id: string) => {
+    if (!firestore) return;
+    const reviewDoc = doc(firestore, 'testimonials', id);
+    try {
+      await updateDoc(reviewDoc, { status: 'Approved' });
+      toast({
+        title: 'Review Approved',
+        description: 'The customer review has been approved and is now visible.'
+      });
+    } catch (e: any) {
+      toast({
+        title: 'Error',
+        description: e.message,
+        variant: 'destructive'
+      });
     }
+  };
+
+  const handleDelete = (id: string) => {
+    if (!firestore) return;
+    if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
+    const reviewDoc = doc(firestore, 'testimonials', id);
+    deleteDoc(reviewDoc)
+      .then(() => {
+        toast({
+          title: 'Review Deleted',
+          description: 'The customer review has been permanently removed.'
+        });
+      })
+      .catch((e: any) => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: reviewDoc.path,
+            operation: 'delete',
+          })
+        );
+        toast({
+          title: 'Error',
+          description: e.message,
+          variant: 'destructive'
+        });
+      });
+  }
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
@@ -112,8 +122,8 @@ export default function ReviewsAdminPage() {
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input 
-              placeholder="Search reviews..." 
+            <Input
+              placeholder="Search reviews..."
               className="pl-10 w-64 bg-white/50 backdrop-blur-sm border-primary/20 focus:border-primary/40"
             />
           </div>
@@ -127,34 +137,34 @@ export default function ReviewsAdminPage() {
           </Button>
         </div>
       </div>
-      
+
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <DashboardCard 
+        <DashboardCard
           title="Total Reviews"
           count={totalReviewsCount}
           description="All customer reviews"
           icon={<MessageSquareQuote className="h-6 w-6 text-primary" />}
           trend={{ value: 15.2, isPositive: true }}
         />
-        <DashboardCard 
+        <DashboardCard
           title="Pending Reviews"
           count={pendingReviewsCount}
           description="Awaiting approval"
           icon={<Clock className="h-6 w-6 text-primary" />}
           trend={{ value: 8.7, isPositive: false }}
         />
-        <DashboardCard 
+        <DashboardCard
           title="Approved Reviews"
           count={approvedReviewsCount}
           description="Published reviews"
           icon={<CheckCircle className="h-6 w-6 text-primary" />}
           trend={{ value: 22.1, isPositive: true }}
         />
-        <DashboardCard 
+        <DashboardCard
           title="Avg. Rating"
-          count={reviews && reviews.length > 0 
-            ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1) 
+          count={reviews && reviews.length > 0
+            ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
             : '0.0'
           }
           description="Average customer rating"
@@ -162,7 +172,7 @@ export default function ReviewsAdminPage() {
           trend={{ value: 4.2, isPositive: true }}
         />
       </div>
-      
+
       {/* Reviews Table */}
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-muted/30 to-transparent">
@@ -224,8 +234,8 @@ export default function ReviewsAdminPage() {
                 </TableHeader>
                 <TableBody>
                   {reviews.map((review) => (
-                    <TableRow 
-                      key={review.id} 
+                    <TableRow
+                      key={review.id}
                       className={`hover:bg-gradient-to-r hover:from-primary/[0.02] hover:to-transparent transition-all duration-200 border-border/30 ${review.status === 'Pending' ? 'bg-amber-50/50' : ''}`}
                     >
                       <TableCell className="py-4">
@@ -239,7 +249,7 @@ export default function ReviewsAdminPage() {
                           <div>
                             <div className="font-semibold text-foreground">{review.name}</div>
                             <div className="text-sm text-muted-foreground">
-                              {review.packageId || 'No package'}
+                              {packageMap.get(review.packageId) || 'Unknown Package'}
                             </div>
                           </div>
                         </div>
@@ -251,9 +261,9 @@ export default function ReviewsAdminPage() {
                         <div className="flex items-center justify-center gap-2">
                           <div className="flex">
                             {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`h-4 w-4 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-muted-foreground'}`} 
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-muted-foreground'}`}
                               />
                             ))}
                           </div>
@@ -261,13 +271,13 @@ export default function ReviewsAdminPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge 
+                        <Badge
                           variant={review.status === 'Approved' ? "default" : "secondary"}
-                          className={review.status === 'Pending' 
-                            ? 'bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200' 
-                            : review.status === 'Approved' 
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                            : ''
+                          className={review.status === 'Pending'
+                            ? 'bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200'
+                            : review.status === 'Approved'
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                              : ''
                           }
                         >
                           {review.status === 'Approved' && <CheckCircle className="w-3 h-3 mr-1" />}
@@ -287,11 +297,11 @@ export default function ReviewsAdminPage() {
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             {review.status === 'Pending' && (
                               <DropdownMenuItem onClick={() => handleApprove(review.id)} className="gap-2">
-                                <Check className="h-4 w-4 text-green-500"/> Approve Review
+                                <Check className="h-4 w-4 text-green-500" /> Approve Review
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem className="text-destructive gap-2" onClick={() => handleDelete(review.id)}>
-                              <Trash className="h-4 w-4"/> Delete Review
+                              <Trash className="h-4 w-4" /> Delete Review
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
