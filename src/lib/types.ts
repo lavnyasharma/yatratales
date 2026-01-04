@@ -1,5 +1,5 @@
-import type { User as FirebaseUser } from 'firebase/auth';
-import { Timestamp } from 'firebase/firestore';
+import type { User as FirebaseUser } from "firebase/auth";
+import { Timestamp } from "firebase/firestore";
 
 export interface Rate {
   pax: number; // e.g. 2, 4, 6, 8
@@ -27,7 +27,7 @@ export interface TravelPackage {
   location: string;
   duration: string; // e.g., "7 Days / 6 Nights"
   description: string;
-  packageType?: 'international' | 'domestic';
+  packageType?: "international" | "domestic" | "group";
   imageIds: string[];
   imageUrls: string[];
   itinerary: string;
@@ -63,7 +63,7 @@ export interface Testimonial {
   rating: number;
   comment: string;
   packageId: string;
-  status: 'Pending' | 'Approved';
+  status: "Pending" | "Approved";
   createdAt: Timestamp;
   imageId?: string;
 }
@@ -77,7 +77,4 @@ export interface BlogPost {
   author: string;
 }
 
-export interface AppUser extends FirebaseUser { }
-
-
-
+export interface AppUser extends FirebaseUser {}

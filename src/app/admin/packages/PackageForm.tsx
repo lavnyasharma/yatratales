@@ -31,7 +31,7 @@ const packageSchema = z.object({
   duration: z.string().min(2, "Duration is required."),
   description: z.string().min(10, "Description is required."),
   itinerary: z.string().min(10, "Itinerary is required."),
-  packageType: z.enum(["international", "domestic"]).default("domestic"),
+  packageType: z.enum(["international", "domestic", "group"]).default("domestic"),
   inclusions: z.array(z.string()).default([]),
   exclusions: z.array(z.string()).default([]),
   transfers: z.array(z.string()).default([]),
@@ -239,6 +239,14 @@ export default function PackageForm({ initialData, packageId }: { initialData?: 
                       </FormControl>
                       <FormLabel className="font-normal cursor-pointer">
                         International
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="group" />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer">
+                        Group Package
                       </FormLabel>
                     </FormItem>
                   </RadioGroup>

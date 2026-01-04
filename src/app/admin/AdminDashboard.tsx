@@ -29,7 +29,8 @@ import {
   Users,
   Star,
   BarChart3,
-  Settings
+  Settings,
+  Mail
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useFirebase } from '@/firebase';
@@ -126,6 +127,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
 const adminNavItems = [
     { href: '/admin/bookings', label: 'Bookings', icon: ListOrdered },
     { href: '/admin/packages', label: 'Packages', icon: Package },
+    { href: '/admin/leads', label: 'Leads', icon: Mail },
     { href: '/admin/reviews', label: 'Reviews', icon: MessageSquareQuote },
     { href: '/admin/testimonials', label: 'Testimonials', icon: Users },
     { href: '/admin/blog', label: 'Blog Posts', icon: FileText },

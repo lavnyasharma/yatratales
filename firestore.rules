@@ -34,6 +34,13 @@ service cloud.firestore {
     match /{path=**}/bookings/{bookingId} {
       allow read: if request.auth != null;
     }
+    
+    // Allow public creation of leads (popup form)
+    // Only authenticated admins can read/manage leads
+    match /leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
 
   }
 }

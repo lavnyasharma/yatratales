@@ -49,6 +49,17 @@ export default function Header() {
     return locations;
   }, [allPackages]);
 
+  // Get unique locations for group packages
+  const groupLocations = useMemo(() => {
+    if (!allPackages) return [];
+    const locations = allPackages
+      .filter(pkg => pkg.packageType === 'group')
+      .map(pkg => pkg.location)
+      .filter((location, index, self) => self.indexOf(location) === index)
+      .slice(0, 6); // Limit to 6 locations
+    return locations;
+  }, [allPackages]);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-20 items-center justify-between">
@@ -116,6 +127,34 @@ export default function Header() {
                   ) : (
                     <li className="col-span-2 p-3 text-sm text-muted-foreground text-center">
                       No domestic packages available
+                    </li>
+                  )}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+             <NavigationMenuItem>
+              <NavigationMenuTrigger className="text-base font-semibold">
+                Group Packages<span className="text-primary">.</span>
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  <ListItem href="/packages?type=group" title="All Group Packages">
+                    Explore all our group tour packages
+                  </ListItem>
+                  {groupLocations.length > 0 ? (
+                    groupLocations.map((location) => (
+                      <ListItem
+                        key={location}
+                        href={`/packages?type=group&search=${encodeURIComponent(location)}`}
+                        title={location}
+                      >
+                         Join a group to {location}
+                      </ListItem>
+                    ))
+                  ) : (
+                    <li className="col-span-2 p-3 text-sm text-muted-foreground text-center">
+                      No group packages available
                     </li>
                   )}
                 </ul>
